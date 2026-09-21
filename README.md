@@ -212,11 +212,28 @@ advertising something the app does not contain.
 
 The build is fully static, so almost anything will host it.
 
-**Vercel** (zero config):
+**Vercel** (zero config, and the recommended host — it is the only one of
+these that can set the response headers below):
+
+Import the repository at [vercel.com/new](https://vercel.com/new) and accept
+the detected Next.js settings. Every push to `main` then redeploys. Or from
+the CLI:
 
 ```bash
 npx vercel --prod
 ```
+
+`WEBSITE_URL` — the canonical link, the absolute Open Graph image URL and
+the sitemap — resolves itself on Vercel from `VERCEL_PROJECT_PRODUCTION_URL`,
+so there is nothing to configure. On any other host, or once a custom domain
+is attached, set `SITE_URL` instead:
+
+```bash
+SITE_URL=https://retromindarcade.com npm run build
+```
+
+Without either, the site falls back to a placeholder origin and says so in
+the UI rather than publishing a URL that does not resolve.
 
 **Any Node host:**
 

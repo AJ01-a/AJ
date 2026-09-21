@@ -70,8 +70,37 @@ export const IOS_AVAILABLE = APP_STORE_URL !== null;
 export const SUPPORT_EMAIL = 'support@YOURDOMAIN.com';
 export const SUPPORT_EMAIL_IS_PLACEHOLDER = SUPPORT_EMAIL.includes('YOURDOMAIN');
 
-/** PLACEHOLDER - replace with the deployed origin (used for canonical + OG). */
-export const WEBSITE_URL = 'https://YOURDOMAIN.com';
+/**
+ * The origin the site is served from. Used for the canonical link, the
+ * absolute Open Graph image URL and every entry in the sitemap - all of
+ * which are wrong, and visibly so when a link is shared, if this does not
+ * match reality.
+ *
+ * Resolved at build time, in order:
+ *
+ *  1. `SITE_URL` - set this for a custom domain. It wins over everything.
+ *  2. `VERCEL_PROJECT_PRODUCTION_URL` - set automatically by Vercel to the
+ *     project's production host (no scheme), so a Vercel deploy is correct
+ *     with no configuration at all. Deliberately not `VERCEL_URL`, which is
+ *     the per-deployment host and would make every preview build claim a
+ *     different canonical URL.
+ *  3. The placeholder, which the site calls out in the UI rather than
+ *     passing off as real.
+ *
+ * Only ever read in server-rendered metadata, so the environment variables
+ * do not need a `NEXT_PUBLIC_` prefix.
+ */
+function resolveWebsiteUrl(): string {
+  const explicit = process.env.SITE_URL;
+  if (explicit) return explicit.replace(/\/+$/, '');
+
+  const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercelHost) return `https://${vercelHost}`;
+
+  return 'https://YOURDOMAIN.com';
+}
+
+export const WEBSITE_URL = resolveWebsiteUrl();
 export const WEBSITE_URL_IS_PLACEHOLDER = WEBSITE_URL.includes('YOURDOMAIN');
 
 /** Navigation targets, in document order. */
