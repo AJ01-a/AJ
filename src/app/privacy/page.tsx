@@ -44,18 +44,27 @@ export default function PrivacyPage() {
       <h3>What your browser sends anyway</h3>
       <p>
         Any web server necessarily receives a request in order to send a page
-        back. Depending on where this site is hosted, the hosting provider may
-        keep short-lived server logs containing your IP address, the page
-        requested, a timestamp and your browser&rsquo;s user-agent string. That
-        is standard infrastructure logging, is not linked to any identity, and
-        is not used by the site owner to profile you.
+        back. This site is hosted on{' '}
+        <a href="https://pages.github.com/">GitHub Pages</a>, so those requests
+        are handled by GitHub rather than by the site owner. GitHub&rsquo;s
+        documentation states that{' '}
+        <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages">
+          a visitor&rsquo;s IP address is logged and stored for security
+          purposes
+        </a>{' '}
+        whenever a Pages site is visited. How long GitHub keeps it, and what
+        else they collect, is governed by the{' '}
+        <a href="https://docs.github.com/site-policy/privacy-policies/github-privacy-statement">
+          GitHub Privacy Statement
+        </a>
+        , not by this one.
       </p>
-      <div className="callout">
-        <strong>To be completed before publication:</strong> name your hosting
-        provider here and link their privacy policy, and state their log
-        retention period. This section cannot be accurate until the site has a
-        host.
-      </div>
+      <p>
+        Those logs are not available to the site owner. No analytics, tag
+        manager or other third-party script runs on this site, so nothing
+        beyond that server-side logging is collected, and nothing is used to
+        profile you.
+      </p>
 
       <h3>Fonts and assets</h3>
       <p>

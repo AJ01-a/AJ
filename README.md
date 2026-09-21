@@ -324,7 +324,6 @@ more. What remains:
 
 | Placeholder | Where | Notes |
 | --- | --- | --- |
-| Hosting provider + log retention | `src/app/privacy/page.tsx` | Marked with a callout. Should now name GitHub Pages. |
 | Governing law, legal entity, consumer rights | `src/app/terms/page.tsx` | Marked with a callout. |
 | `APP_STORE_URL` | `src/config/site.ts` | Stays `null` until the iOS app ships. |
 
