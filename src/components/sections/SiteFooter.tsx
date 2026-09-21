@@ -1,4 +1,4 @@
-import { APP_NAME, CREATOR_NAME, SUPPORT_EMAIL } from '@/config/site';
+import { APP_NAME, CREATOR_NAME, SUPPORT_URL } from '@/config/site';
 
 const COLUMNS = [
   {
@@ -23,7 +23,7 @@ const COLUMNS = [
     links: [
       { href: '#install', label: 'Installation guide' },
       { href: '#faq', label: 'FAQ' },
-      { href: `mailto:${SUPPORT_EMAIL}`, label: 'Support' },
+      { href: SUPPORT_URL, label: 'Support' },
     ],
   },
 ] as const;

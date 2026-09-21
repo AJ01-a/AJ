@@ -18,6 +18,15 @@ import type { NextConfig } from 'next';
 const isStaticExport = process.env.STATIC_EXPORT === 'true';
 const basePath = process.env.BASE_PATH ?? '';
 
+// Republished under a NEXT_PUBLIC_ name so it is inlined into the browser
+// bundle as well as the server build. Next rewrites next/link and
+// next/image for `basePath` automatically, but not a plain <a href>, a
+// fetch(), new Audio(), or a path written into the web app manifest - those
+// read it back through src/config/base-path.ts. Without this the server
+// would render /AJ/... and the client /..., which is both a broken link and
+// a hydration mismatch.
+process.env.NEXT_PUBLIC_BASE_PATH = basePath;
+
 const nextConfig: NextConfig = {
   ...(isStaticExport ? { output: 'export' as const } : {}),
   ...(basePath ? { basePath, assetPrefix: basePath } : {}),

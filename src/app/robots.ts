@@ -8,7 +8,7 @@ import type { MetadataRoute } from 'next';
  */
 export const dynamic = 'force-static';
 
-import { WEBSITE_URL } from '@/config/site';
+import { WEBSITE_URL } from '@/config/site-url';
 
 export default function robots(): MetadataRoute.Robots {
   return {

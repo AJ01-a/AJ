@@ -1,27 +1,25 @@
 # Deploys the site to GitHub Pages.
 #
-# Manual-trigger only by default, because `actions/deploy-pages` fails if
-# Pages has not been enabled for the repository — and a workflow that fails
-# on every push is noise that trains you to ignore the Actions tab.
+# This is the live deployment. Every push to main rebuilds and publishes.
 #
 # For a *project* site (https://<user>.github.io/AJ) the app must be built
-# with a base path, which is what BASE_PATH below does. For a user site
-# (https://<user>.github.io) set BASE_PATH to an empty string.
+# with a base path, which is what BASE_PATH below does, and the canonical
+# URL must include it too — see the "Resolve the public URL" step. For a
+# user site (https://<user>.github.io) set BASE_PATH to an empty string.
 #
-# Vercel is simpler if you have the option — it needs no configuration at
-# all and keeps image optimisation, which this static export gives up.
+# A static export gives up two things a Node host would provide: image
+# optimisation at request time (which is why the screenshots are pre-encoded
+# as WebP), and custom response headers. See README > Deploying.
 
 name: Deploy to GitHub Pages
 
-# Manual only, until Pages is switched on for this repository.
-#
-# Enabling it: Settings -> Pages -> Build and deployment -> Source:
-# "GitHub Actions". Then either run this from the Actions tab, or uncomment
-# the push trigger below to deploy on every push to main.
+# Requires Pages to be switched on for the repository, with
+# Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
+# Without it `actions/deploy-pages` fails with a 404.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-  # push:
-  #   branches: [main]
 
 permissions:
   contents: read
@@ -53,13 +51,54 @@ jobs:
           npm run lint
           npx tsc --noEmit
 
+      - name: Resolve the public URL
+        id: site
+        # The canonical link, the Open Graph image and the sitemap all need
+        # the absolute origin, including the project-site subdirectory.
+        # github.repository_owner keeps the owner's original casing, but
+        # Pages hostnames are lower-case, so it has to be folded here.
+        run: |
+          owner=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          url="https://${owner}.github.io/${{ github.event.repository.name }}"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Building for $url"
+
       - name: Build static export
         env:
           STATIC_EXPORT: 'true'
           # Repository name, for a project-site base path. Empty for a user
           # site served from the domain root.
           BASE_PATH: /${{ github.event.repository.name }}
+          SITE_URL: ${{ steps.site.outputs.url }}
         run: npm run build
+
+      - name: Confirm no placeholder origin was published
+        # A build that silently fell back to the placeholder would ship a
+        # canonical URL and an OG image that do not resolve.
+        run: |
+          if grep -rq 'YOURDOMAIN' out/; then
+            echo "::error::Placeholder origin found in the export — SITE_URL did not take effect."
+            exit 1
+          fi
+
+      - name: Confirm asset paths carry the base path
+        # A project site is served from a subdirectory, so any root-relative
+        # path Next does not rewrite for us (a plain <a href>, the manifest)
+        # 404s unless it was built through src/config/base-path.ts. The
+        # download link is the one that matters most - it is the whole point
+        # of the site.
+        run: |
+          base="/${{ github.event.repository.name }}"
+          fail=0
+          if ! grep -q "href=\"$base/downloads/" out/index.html; then
+            echo "::error::The download link is missing the $base prefix — it would 404."
+            fail=1
+          fi
+          if ! grep -q "\"start_url\": *\"$base/\"" out/manifest.webmanifest; then
+            echo "::error::manifest start_url is missing the $base prefix."
+            fail=1
+          fi
+          exit $fail
 
       - name: Confirm the APK made it into the export
         # The whole point of the site is the download; a deploy that quietly

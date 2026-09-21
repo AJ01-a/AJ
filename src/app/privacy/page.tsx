@@ -3,8 +3,8 @@ import type { Metadata } from 'next';
 import LegalPage from '@/components/legal/LegalPage';
 import {
   APP_NAME,
-  SUPPORT_EMAIL,
-  SUPPORT_EMAIL_IS_PLACEHOLDER,
+  SUPPORT_URL,
+  SUPPORT_LABEL,
 } from '@/config/site';
 
 export const metadata: Metadata = {
@@ -118,16 +118,11 @@ export default function PrivacyPage() {
 
       <h2>Contact</h2>
       <p>
-        Questions about this policy can be sent to{' '}
-        <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
+        Questions about this policy can be raised on{' '}
+        <a href={SUPPORT_URL}>{SUPPORT_LABEL}</a>. Note that issues there are
+        public, so please do not include anything you would not want others to
+        read.
       </p>
-      {SUPPORT_EMAIL_IS_PLACEHOLDER && (
-        <div className="callout">
-          <strong>Placeholder address.</strong> Replace{' '}
-          <code>SUPPORT_EMAIL</code> in <code>src/config/site.ts</code> with a
-          real, monitored address before publishing.
-        </div>
-      )}
 
       <div className="callout">
         <strong>This is a template, not legal advice.</strong> It describes the

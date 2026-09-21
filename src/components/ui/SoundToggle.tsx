@@ -2,12 +2,14 @@
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
+import { asset } from '@/config/base-path';
+
 type Cue = 'tap' | 'swoosh' | 'confirm';
 
 const FILES: Record<Cue, string> = {
-  tap: '/audio/tap.wav',
-  swoosh: '/audio/swoosh.wav',
-  confirm: '/audio/powerup.wav',
+  tap: asset('/audio/tap.wav'),
+  swoosh: asset('/audio/swoosh.wav'),
+  confirm: asset('/audio/powerup.wav'),
 };
 
 interface SoundApi {

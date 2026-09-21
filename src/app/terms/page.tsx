@@ -1,7 +1,14 @@
 import type { Metadata } from 'next';
 
 import LegalPage from '@/components/legal/LegalPage';
-import { APP_NAME, CREATOR_NAME, SUPPORT_EMAIL } from '@/config/site';
+import Link from 'next/link';
+
+import {
+  APP_NAME,
+  CREATOR_NAME,
+  SUPPORT_LABEL,
+  SUPPORT_URL,
+} from '@/config/site';
 
 export const metadata: Metadata = {
   title: 'Terms of Use',
@@ -84,13 +91,13 @@ export default function TermsPage() {
         {CREATOR_NAME}. Several games belong to long-established genres, but
         each is an original implementation with its own name, rules,
         presentation and assets. See the{' '}
-        <a href="/licenses">Licenses</a> page.
+        <Link href="/licenses">Licenses</Link> page.
       </p>
 
       <h2>Contact</h2>
       <p>
-        Questions about these terms can be sent to{' '}
-        <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
+        Questions about these terms can be raised on{' '}
+        <a href={SUPPORT_URL}>{SUPPORT_LABEL}</a>.
       </p>
 
       <div className="callout">

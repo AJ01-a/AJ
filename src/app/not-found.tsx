@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { SUPPORT_EMAIL } from '@/config/site';
+import { SUPPORT_URL } from '@/config/site';
 
 export const metadata = { title: 'Page not found' };
 
@@ -44,7 +44,7 @@ export default function NotFound() {
         <p className="mt-8 text-xs text-ink-ghost">
           Still stuck?{' '}
           <a
-            href={`mailto:${SUPPORT_EMAIL}`}
+            href={SUPPORT_URL}
             className="text-cyan underline-offset-4 hover:underline"
           >
             Get in touch

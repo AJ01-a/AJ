@@ -7,8 +7,8 @@ import {
   APP_TAGLINE,
   APP_VERSION,
   CREATOR_NAME,
-  WEBSITE_URL,
 } from '@/config/site';
+import { WEBSITE_URL } from '@/config/site-url';
 import { GAME_COUNT } from '@/data/games';
 
 // Self-hosted at build time by next/font: no render-blocking request to a

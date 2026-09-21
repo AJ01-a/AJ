@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect } from 'react';
 
-import { SUPPORT_EMAIL } from '@/config/site';
+import { SUPPORT_URL } from '@/config/site';
 
 /**
  * Last-resort boundary.
@@ -60,7 +60,7 @@ export default function GlobalError({
 
         <p className="mt-4 text-xs text-ink-ghost">
           <a
-            href={`mailto:${SUPPORT_EMAIL}`}
+            href={SUPPORT_URL}
             className="text-cyan underline-offset-4 hover:underline"
           >
             Report this

@@ -4,8 +4,8 @@ import {
   APP_VERSION,
   BUILT_WITH,
   CREATOR_NAME,
-  SUPPORT_EMAIL,
-  SUPPORT_EMAIL_IS_PLACEHOLDER,
+  SUPPORT_URL,
+  SUPPORT_LABEL,
 } from '@/config/site';
 
 export default function AboutCreator() {
@@ -33,20 +33,11 @@ export default function AboutCreator() {
           </p>
 
           <a
-            href={`mailto:${SUPPORT_EMAIL}`}
+            href={SUPPORT_URL}
             className="mt-4 inline-block break-all font-display text-sm font-bold tracking-wide text-cyan underline-offset-4 hover:underline"
           >
-            {SUPPORT_EMAIL}
+            {SUPPORT_LABEL}
           </a>
-
-          {SUPPORT_EMAIL_IS_PLACEHOLDER && (
-            /* Visible on purpose: a fake-looking placeholder is far safer
-               than a plausible address that silently goes nowhere. */
-            <p className="mt-3 rounded-lg border border-amber/30 bg-amber/10 p-3 text-xs leading-relaxed text-amber">
-              Placeholder address. Set <code>SUPPORT_EMAIL</code> in{' '}
-              <code>src/config/site.ts</code> before publishing.
-            </p>
-          )}
 
           <dl className="mt-8 space-y-3 border-t border-[var(--edge)] pt-6 text-sm">
             <div className="flex justify-between gap-4">

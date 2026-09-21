@@ -149,9 +149,15 @@ check('html lang is set', structure.lang === 'en');
 check('Structured data present', structure.jsonLd);
 
 // ---- legal pages ------------------------------------------------------
-for (const path of ['/privacy', '/terms', '/licenses']) {
-  const res = await fetch(new URL(path, base));
-  check(`${path} exists`, res.ok, `${res.status}`);
+// Joined onto the base rather than resolved against it: `new URL('/privacy',
+// 'http://host/AJ')` discards the /AJ, so a project-site deploy would be
+// checked at the wrong path and look broken when it is not.
+const root = base.replace(/\/+$/, '');
+for (const name of ['privacy', 'terms', 'licenses']) {
+  // The trailing slash is what a static export serves; a server build
+  // redirects to the un-slashed form and fetch follows it.
+  const res = await fetch(`${root}/${name}/`);
+  check(`/${name} exists`, res.ok, `${res.status}`);
 }
 
 await browser.close();
