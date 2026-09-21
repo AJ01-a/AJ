@@ -1,0 +1,26 @@
+# Runs on every push and pull request.
+#
+# Deliberately cheap: lint, types, and a production build. The Puppeteer
+# checks in scripts/ need a browser and a running server, so they are left
+# for local use rather than slowing every push.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run build

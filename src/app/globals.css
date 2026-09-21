@@ -1,0 +1,389 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   RetroMind Arcade — design tokens
+
+   The palette is deliberately the app's own, so the site and the product
+   read as one thing. Accents are used sparingly: one accent per surface,
+   never three at once.
+   ------------------------------------------------------------------ */
+@theme {
+  /* Background stack, darkest first. Deeper than the app's, because a
+     website hero wants more space around the light. */
+  --color-void: #04060f;
+  --color-deep: #080b1a;
+  --color-base: #0c1024;
+  --color-raised: #141a33;
+  --color-elevated: #1c2340;
+
+  /* Neon accents. */
+  --color-cyan: #22e8f5;
+  --color-magenta: #ff3dae;
+  --color-violet: #8b5cf6;
+  --color-lime: #a3ff3c;
+  --color-amber: #ffb020;
+  --color-azure: #4d8dff;
+  --color-mint: #3dffc0;
+  --color-coral: #ff6b5b;
+
+  /* Text. */
+  --color-ink: #f4f6ff;
+  --color-ink-dim: #a8b0d0;
+  --color-ink-faint: #6f78a0;
+  --color-ink-ghost: #4a5274;
+
+  --font-display: var(--font-orbitron), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-panel: 1rem;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ------------------------------------------------------------------ base */
+
+:root {
+  color-scheme: dark;
+  --edge: color-mix(in oklab, white 12%, transparent);
+  --edge-strong: color-mix(in oklab, white 22%, transparent);
+  --glass: color-mix(in oklab, white 6%, transparent);
+}
+
+* {
+  min-width: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* The scroll-driven hero is pinned; this stops iOS from fighting it. */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-void);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  /* A stray horizontal scrollbar is the classic failure of a site like
+     this; the particle canvas and wide type both risk it. */
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-cyan) 40%, transparent);
+  color: var(--color-ink);
+}
+
+/* ------------------------------------------------------- focus + a11y */
+
+:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Only remove the ring for pointer users who did not ask for it. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* A keyboard user's first stop: jump straight past the cinematic hero. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 200;
+  transform: translateY(-160%);
+  transition: transform 0.18s var(--ease-out-expo);
+  background: var(--color-cyan);
+  color: var(--color-deep);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  padding: 0.7rem 1.1rem;
+  border-radius: 0.5rem;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* ------------------------------------------------------------ scrollbar */
+
+@media (pointer: fine) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--color-violet) 60%, transparent)
+      transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-void);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      var(--color-violet),
+      var(--color-magenta)
+    );
+    border-radius: 999px;
+    border: 3px solid var(--color-void);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(var(--color-cyan), var(--color-violet));
+  }
+}
+
+/* -------------------------------------------------------------- surfaces */
+
+.panel {
+  /*
+   * A near-opaque fill rather than a backdrop blur.
+   *
+   * These panels sit on an almost flat dark field, so a blur has very little
+   * to blur — but backdrop-filter forces the compositor to re-read the
+   * backdrop for every panel on screen, which is one of the most expensive
+   * things a mobile GPU can be asked to do. The glass reads the same and
+   * costs nothing.
+   */
+  background: color-mix(in oklab, var(--color-raised) 92%, transparent);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-panel);
+}
+
+/* A single hairline of light along the top edge — the detail that makes
+   a dark panel read as glass rather than as a grey box. */
+.panel-sheen {
+  position: relative;
+  overflow: hidden;
+}
+.panel-sheen::before {
+  content: "";
+  position: absolute;
+  inset-inline: 12%;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, white 55%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.hairline {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--edge-strong),
+    transparent
+  );
+}
+
+/* ---------------------------------------------------------- typography */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+}
+
+.text-gradient {
+  background: linear-gradient(
+    100deg,
+    var(--color-cyan),
+    var(--color-violet) 45%,
+    var(--color-magenta)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* --------------------------------------------------------- environment */
+
+/* Faint CRT scanlines. Kept under 3% opacity: at higher values it reads as
+   a broken screen rather than as atmosphere. */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 2px,
+    rgba(255, 255, 255, 0.025) 2px 3px
+  );
+  mix-blend-mode: overlay;
+}
+
+.grid-floor {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--color-violet) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--color-violet) 9%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 20%, transparent 75%);
+  /* Promote once, so the mask is rasterised a single time rather than on
+     every scroll frame of the pinned hero. */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* ------------------------------------------------------------ utilities */
+
+.shell {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 24px -6px color-mix(in oklab, var(--color-cyan) 70%, transparent);
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -10px, 0); }
+}
+.float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% { opacity: 0.5; transform: scale(0.96); }
+  70% { opacity: 0; transform: scale(1.25); }
+  100% { opacity: 0; transform: scale(1.25); }
+}
+
+/* ------------------------------------------------------- reduced motion */
+
+/*
+ * The site's whole premise is motion, so reduced motion does not mean "no
+ * story" — it means the same story told in cuts instead of a scrub. The
+ * particle scene switches to a small number of static states, and every
+ * decorative loop stops.
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .float-slow {
+    animation: none;
+  }
+}
+
+/* ----------------------------------------------------------- legal pages */
+
+/*
+ * Long-form documents get their own rhythm. Scoped to a class rather than
+ * applied globally so the marketing sections keep their tighter spacing.
+ */
+.legal-body {
+  color: var(--color-ink-dim);
+  font-size: 0.975rem;
+  line-height: 1.75;
+}
+.legal-body h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+  color: var(--color-ink);
+  margin-top: 2.75rem;
+  margin-bottom: 0.85rem;
+}
+.legal-body h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  margin-top: 1.9rem;
+  margin-bottom: 0.6rem;
+}
+.legal-body p + p {
+  margin-top: 1rem;
+}
+.legal-body ul {
+  margin: 1rem 0;
+  padding-left: 1.15rem;
+  list-style: none;
+}
+.legal-body li {
+  position: relative;
+  margin-bottom: 0.55rem;
+  padding-left: 0.35rem;
+}
+.legal-body li::before {
+  content: "";
+  position: absolute;
+  left: -0.85rem;
+  top: 0.68em;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-cyan);
+}
+.legal-body strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.legal-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  background: var(--glass);
+  border: 1px solid var(--edge);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+}
+.legal-body a {
+  color: var(--color-cyan);
+  text-underline-offset: 3px;
+}
+.legal-body a:hover {
+  text-decoration: underline;
+}
+.legal-body .callout {
+  border: 1px solid color-mix(in oklab, var(--color-amber) 30%, transparent);
+  background: color-mix(in oklab, var(--color-amber) 8%, transparent);
+  color: var(--color-amber);
+  border-radius: 0.75rem;
+  padding: 1.1rem 1.25rem;
+  margin: 1.75rem 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}

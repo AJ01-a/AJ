@@ -1,0 +1,85 @@
+# Deploys the site to GitHub Pages.
+#
+# Disabled by default: it only runs when triggered manually, or after you
+# enable Pages for this repository. To turn it on:
+#
+#   1. Repository → Settings → Pages → Build and deployment → Source:
+#      "GitHub Actions".
+#   2. Run this workflow once from the Actions tab, or push to main.
+#
+# For a *project* site (https://<user>.github.io/AJ) the app must be built
+# with a base path, which is what BASE_PATH below does. For a user site
+# (https://<user>.github.io) set BASE_PATH to an empty string.
+#
+# Vercel is simpler if you have the option — it needs no configuration at
+# all and keeps image optimisation, which this static export gives up.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two deploys at once; cancel a queued one rather than a running
+# one, so an in-flight deploy always finishes.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint and type check
+        run: |
+          npm run lint
+          npx tsc --noEmit
+
+      - name: Build static export
+        env:
+          STATIC_EXPORT: 'true'
+          # Repository name, for a project-site base path. Empty for a user
+          # site served from the domain root.
+          BASE_PATH: /${{ github.event.repository.name }}
+        run: npm run build
+
+      - name: Confirm the APK made it into the export
+        # The whole point of the site is the download; a deploy that quietly
+        # drops the package is worse than a failed one.
+        run: |
+          apk=$(find out/downloads -name '*.apk' | head -1)
+          if [ -z "$apk" ]; then
+            echo "::error::No APK found in out/downloads — the download would 404."
+            exit 1
+          fi
+          echo "Found $apk ($(du -h "$apk" | cut -f1))"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
