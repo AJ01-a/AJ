@@ -1,11 +1,8 @@
 # Deploys the site to GitHub Pages.
 #
-# Disabled by default: it only runs when triggered manually, or after you
-# enable Pages for this repository. To turn it on:
-#
-#   1. Repository → Settings → Pages → Build and deployment → Source:
-#      "GitHub Actions".
-#   2. Run this workflow once from the Actions tab, or push to main.
+# Manual-trigger only by default, because `actions/deploy-pages` fails if
+# Pages has not been enabled for the repository — and a workflow that fails
+# on every push is noise that trains you to ignore the Actions tab.
 #
 # For a *project* site (https://<user>.github.io/AJ) the app must be built
 # with a base path, which is what BASE_PATH below does. For a user site
@@ -16,10 +13,15 @@
 
 name: Deploy to GitHub Pages
 
+# Manual only, until Pages is switched on for this repository.
+#
+# Enabling it: Settings -> Pages -> Build and deployment -> Source:
+# "GitHub Actions". Then either run this from the Actions tab, or uncomment
+# the push trigger below to deploy on every push to main.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+  # push:
+  #   branches: [main]
 
 permissions:
   contents: read
@@ -36,9 +38,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -70,7 +72,7 @@ jobs:
           fi
           echo "Found $apk ($(du -h "$apk" | cut -f1))"
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: out
 
@@ -82,4 +84,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

@@ -239,9 +239,16 @@ STATIC_EXPORT=true BASE_PATH=/AJ npm run build
 ```
 
 `.github/workflows/deploy-pages.yml` does exactly this and deploys `out/`.
-It is inert until you set **Settings → Pages → Source: GitHub Actions**. The
-workflow fails the build if the APK is missing from the export, because a
-deploy that silently drops the download is worse than one that fails.
+It is **manual-trigger only** by default, because `actions/deploy-pages`
+fails outright if Pages has not been enabled — and a workflow that goes red
+on every push trains you to ignore the Actions tab.
+
+To turn it on: **Settings → Pages → Build and deployment → Source: GitHub
+Actions**, then run it once from the Actions tab. Uncomment the `push:`
+trigger in the workflow to deploy automatically thereafter.
+
+The workflow fails the build if the APK is missing from the export, because
+a deploy that silently drops the download is worse than one that fails.
 
 Two things a static export gives up: image optimisation at request time
 (which is why the screenshots are pre-encoded as WebP), and the response
