@@ -28,7 +28,16 @@ await page.waitForFunction(
   () => Boolean(document.querySelector('button[aria-label^="Download"]')),
   { timeout: 30000 },
 );
-await new Promise((r) => setTimeout(r, 1200));
+// And the preloader has to have finished, because until it does it covers
+// the page and swallows the click.
+await page.waitForFunction(
+  () =>
+    document.querySelector('[data-preloader]')?.getAttribute('data-preloader') ===
+    'done',
+  { timeout: 30000 },
+);
+// One frame for the fade-out transition to stop intercepting pointer events.
+await new Promise((r) => setTimeout(r, 900));
 
 // ---- the APK is actually served -------------------------------------
 const apkPath = await page.evaluate(() => {

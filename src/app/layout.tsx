@@ -8,6 +8,7 @@ import {
   APP_VERSION,
   CREATOR_NAME,
 } from '@/config/site';
+import { asset } from '@/config/base-path';
 import { WEBSITE_URL } from '@/config/site-url';
 import { GAME_COUNT } from '@/data/games';
 
@@ -68,12 +69,14 @@ export const metadata: Metadata = {
     description,
     images: ['/images/og.jpg'],
   },
+  // Next prefixes `manifest` with the basePath but not `icons`, so these
+  // have to be built explicitly or they 404 on a project site.
   icons: {
     icon: [
-      { url: '/icons/icon-32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: asset('/icons/icon-32.png'), sizes: '32x32', type: 'image/png' },
+      { url: asset('/icons/icon-192.png'), sizes: '192x192', type: 'image/png' },
     ],
-    apple: '/icons/icon-180.png',
+    apple: asset('/icons/icon-180.png'),
   },
   manifest: '/manifest.webmanifest',
   robots: { index: true, follow: true },

@@ -18,8 +18,19 @@ export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 /**
  * Prefixes a root-relative path from `public/` with the base path.
  *
- * Only for paths Next does not rewrite itself. Passing a `next/image` src or
- * a `next/link` href through this would prefix it twice.
+ * Use it for anything Next does not rewrite itself. What it does rewrite is
+ * narrower than it looks, and was established by reading the deployed page
+ * rather than by assumption:
+ *
+ *   rewritten by Next    next/link href, metadata `manifest`
+ *   NOT rewritten        plain <a href>, fetch(), new Audio(),
+ *                        metadata `icons`, manifest icon paths, and
+ *                        next/image `src` when `images.unoptimized` is on -
+ *                        which it always is in a static export, because the
+ *                        default loader returns the src untouched instead of
+ *                        routing it through /_next/image
+ *
+ * Passing a next/link href through this would prefix it twice.
  */
 export function asset(path: string): string {
   return `${BASE_PATH}${path}`;

@@ -56,7 +56,10 @@ website/
 │   │   ├── download/             download panel + install dialog
 │   │   ├── legal/                shared legal-page chrome
 │   │   └── ui/                   Section, MagneticButton, TiltCard, SoundToggle
-│   ├── config/site.ts            ★ everything configurable lives here
+│   ├── config/
+│   │   ├── site.ts               ★ everything configurable lives here
+│   │   ├── site-url.ts           canonical origin, resolved at build time
+│   │   └── base-path.ts          subdirectory-safe public/ asset paths
 │   ├── data/
 │   │   ├── games.ts              generated from the app's own catalog
 │   │   └── install-steps.ts      shared by the dialog and the guide
@@ -70,7 +73,7 @@ website/
 │   └── icons/                    favicons and PWA icons
 ├── .github/workflows/
 │   ├── ci.yml                    lint + types + build on every push
-│   └── deploy-pages.yml          optional GitHub Pages deploy
+│   └── deploy-pages.yml          live GitHub Pages deploy, on every push
 └── scripts/
     ├── sync-apk.mjs              copy a built APK in and report its size
     ├── sync-games.mjs            regenerate games.ts from the app catalog
@@ -179,8 +182,9 @@ Everything configurable is in **`src/config/site.ts`**.
 | `APK_UPDATED` | ISO date shown in the download panel. |
 | `ANDROID_REQUIREMENT`, `APK_ARCHITECTURE` | Compatibility text. |
 | `APP_STORE_URL` | **Set this and the iOS button becomes a live link automatically.** While it is `null`, the button renders as a disabled "coming soon". |
-| `SUPPORT_EMAIL` | Shown on the About section and both legal pages. |
-| `WEBSITE_URL` | Canonical URL, Open Graph, sitemap, robots. |
+| `SUPPORT_URL`, `SUPPORT_LABEL` | Contact link, shown on the About section and both legal pages. |
+| `WEBSITE_URL` (`src/config/site-url.ts`) | Canonical URL, Open Graph, sitemap, robots. Supplied by the deploy — see [Deploying](#deploying). |
+| `asset()` (`src/config/base-path.ts`) | Builds any `public/` path Next does not rewrite. Required for a subdirectory deploy. |
 | `NAV_LINKS`, `SCREENSHOTS` | Navigation and the screenshot gallery. |
 
 ### Turning on the iOS link
@@ -210,30 +214,61 @@ advertising something the app does not contain.
 
 ## Deploying
 
-The build is fully static, so almost anything will host it.
+**This site is live on GitHub Pages at
+<https://aj01-a.github.io/AJ/>.** Every push to `main` rebuilds and
+republishes it via `.github/workflows/deploy-pages.yml`; there is nothing to
+run by hand.
 
-**Vercel** (zero config, and the recommended host — it is the only one of
-these that can set the response headers below):
+Pages must be switched on for the repository — **Settings → Pages → Build
+and deployment → Source: "GitHub Actions"**. Without it `actions/deploy-pages`
+fails with a 404.
 
-Import the repository at [vercel.com/new](https://vercel.com/new) and accept
-the detected Next.js settings. Every push to `main` then redeploys. Or from
-the CLI:
+### Serving from a subdirectory
 
-```bash
-npx vercel --prod
+A Pages *project* site is served from `/<repo>`, not the domain root, and
+that is the one thing most likely to break silently. Next rewrites
+`next/link` and `next/image` for `basePath` on its own, but **not** a plain
+`<a href>`, a `fetch()`, `new Audio()`, or a path written into the web app
+manifest.
+
+`next.config.ts` therefore republishes `BASE_PATH` as
+`NEXT_PUBLIC_BASE_PATH`, so the value is inlined into the browser bundle as
+well as the server build, and `src/config/base-path.ts` is the single place
+those paths are built:
+
+```ts
+import { asset } from '@/config/base-path';
+
+<a href={asset('/downloads/app.apk')} download>   // correct under /AJ
+<a href="/downloads/app.apk" download>            // 404s under /AJ
 ```
 
-`WEBSITE_URL` — the canonical link, the absolute Open Graph image URL and
-the sitemap — resolves itself on Vercel from `VERCEL_PROJECT_PRODUCTION_URL`,
-so there is nothing to configure. On any other host, or once a custom domain
-is attached, set `SITE_URL` instead:
+Do not pass a `next/link` href or a `next/image` src through `asset()` —
+Next already prefixes those, and it would be applied twice.
 
-```bash
-SITE_URL=https://retromindarcade.com npm run build
-```
+The workflow fails the build rather than deploying if the download link or
+the manifest lost its prefix, if the APK is missing from the export, or if a
+placeholder origin made it into the output. A deploy whose download button
+404s is worse than one that fails loudly.
 
-Without either, the site falls back to a placeholder origin and says so in
-the UI rather than publishing a URL that does not resolve.
+### The canonical URL
+
+`WEBSITE_URL` backs the canonical link, the absolute Open Graph image URL and
+the sitemap. It resolves at build time from, in order:
+
+1. `SITE_URL` — what the Pages workflow sets, and what to use for a custom
+   domain.
+2. `VERCEL_PROJECT_PRODUCTION_URL` — set automatically by Vercel, so a
+   Vercel deploy needs no configuration.
+3. A placeholder, which the Pages workflow refuses to publish.
+
+### Other hosts
+
+**Vercel** — import the repository at [vercel.com/new](https://vercel.com/new)
+and accept the detected Next.js settings. Worth knowing: it is served from a
+domain root, so none of the base-path concerns above apply, it keeps image
+optimisation at request time, and it is the only option here that can set
+the response headers below. GitHub Pages cannot set headers at all.
 
 **Any Node host:**
 
@@ -241,31 +276,11 @@ the UI rather than publishing a URL that does not resolve.
 npm run build && npm start      # listens on $PORT, default 3000
 ```
 
-**A purely static host** (Netlify, Cloudflare Pages, S3, GitHub Pages) — no
-config edit needed, it is built in:
+**Building the static export by hand:**
 
 ```bash
-STATIC_EXPORT=true npm run build     # writes ./out
+STATIC_EXPORT=true BASE_PATH=/AJ SITE_URL=https://aj01-a.github.io/AJ npm run build
 ```
-
-For a GitHub Pages *project* site served from a subdirectory, also set the
-base path:
-
-```bash
-STATIC_EXPORT=true BASE_PATH=/AJ npm run build
-```
-
-`.github/workflows/deploy-pages.yml` does exactly this and deploys `out/`.
-It is **manual-trigger only** by default, because `actions/deploy-pages`
-fails outright if Pages has not been enabled — and a workflow that goes red
-on every push trains you to ignore the Actions tab.
-
-To turn it on: **Settings → Pages → Build and deployment → Source: GitHub
-Actions**, then run it once from the Actions tab. Uncomment the `push:`
-trigger in the workflow to deploy automatically thereafter.
-
-The workflow fails the build if the APK is missing from the export, because
-a deploy that silently drops the download is worse than one that fails.
 
 Two things a static export gives up: image optimisation at request time
 (which is why the screenshots are pre-encoded as WebP), and the response
@@ -303,14 +318,13 @@ script needs a nonce, so test it before shipping.
 
 ## Placeholders you must replace
 
-These are deliberately obvious rather than plausible, so none of them can
-reach production unnoticed. Two of them render a visible warning in the UI.
+Support now points at the repository's issue tracker (`SUPPORT_URL`) and the
+canonical origin is supplied by the deploy, so neither is a placeholder any
+more. What remains:
 
 | Placeholder | Where | Notes |
 | --- | --- | --- |
-| `SUPPORT_EMAIL` = `support@YOURDOMAIN.com` | `src/config/site.ts` | Shows an amber warning box on the About section until changed. |
-| `WEBSITE_URL` = `https://YOURDOMAIN.com` | `src/config/site.ts` | Canonical URL, OG tags and sitemap are wrong until this is real. |
-| Hosting provider + log retention | `src/app/privacy/page.tsx` | Marked with a callout. Cannot be accurate until the site has a host. |
+| Hosting provider + log retention | `src/app/privacy/page.tsx` | Marked with a callout. Should now name GitHub Pages. |
 | Governing law, legal entity, consumer rights | `src/app/terms/page.tsx` | Marked with a callout. |
 | `APP_STORE_URL` | `src/config/site.ts` | Stays `null` until the iOS app ships. |
 

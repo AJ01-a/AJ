@@ -81,24 +81,11 @@ jobs:
             exit 1
           fi
 
-      - name: Confirm asset paths carry the base path
-        # A project site is served from a subdirectory, so any root-relative
-        # path Next does not rewrite for us (a plain <a href>, the manifest)
-        # 404s unless it was built through src/config/base-path.ts. The
-        # download link is the one that matters most - it is the whole point
-        # of the site.
-        run: |
-          base="/${{ github.event.repository.name }}"
-          fail=0
-          if ! grep -q "href=\"$base/downloads/" out/index.html; then
-            echo "::error::The download link is missing the $base prefix — it would 404."
-            fail=1
-          fi
-          if ! grep -q "\"start_url\": *\"$base/\"" out/manifest.webmanifest; then
-            echo "::error::manifest start_url is missing the $base prefix."
-            fail=1
-          fi
-          exit $fail
+      - name: Confirm every URL carries the base path
+        # A project site is served from a subdirectory, and Next rewrites
+        # only some root-relative URLs for us. Scanning the built output
+        # catches the rest; enumerating them by hand did not.
+        run: node scripts/check-base-path.mjs out "/${{ github.event.repository.name }}"
 
       - name: Confirm the APK made it into the export
         # The whole point of the site is the download; a deploy that quietly

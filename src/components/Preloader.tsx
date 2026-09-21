@@ -54,6 +54,12 @@ export default function Preloader() {
   return (
     <div
       aria-hidden="true"
+      // Read by scripts/verify.mjs. Until this overlay is done it covers the
+      // page, so a click lands on it instead of the button underneath and
+      // the test fails for a reason that has nothing to do with the site.
+      // Waiting on a fixed delay made that failure intermittent; waiting on
+      // this makes it deterministic.
+      data-preloader={done ? 'done' : 'running'}
       className={`fixed inset-0 z-[100] grid place-items-center bg-void transition-opacity duration-700 ease-out ${
         done ? 'pointer-events-none opacity-0' : 'opacity-100'
       }`}

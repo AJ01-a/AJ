@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 import Section from '@/components/ui/Section';
+import { asset } from '@/config/base-path';
 import { SCREENSHOTS } from '@/config/site';
 
 /**
@@ -39,7 +40,7 @@ export default function Screenshots() {
               <div className="overflow-hidden rounded-[1.7rem]">
                 <Image
                   key={current.src}
-                  src={current.src}
+                  src={asset(current.src)}
                   alt={current.alt}
                   width={585}
                   height={1266}
