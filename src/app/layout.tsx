@@ -99,7 +99,7 @@ const structuredData = {
   '@type': 'SoftwareApplication',
   name: APP_NAME,
   applicationCategory: 'GameApplication',
-  operatingSystem: 'Android 6.0+',
+  operatingSystem: 'Android 7.0+',
   softwareVersion: APP_VERSION,
   description,
   author: { '@type': 'Person', name: CREATOR_NAME },

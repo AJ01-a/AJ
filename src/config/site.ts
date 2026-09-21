@@ -40,10 +40,18 @@ export const APK_FILE_NAME = `retromind-arcade-${APP_VERSION}.apk`;
 export const APK_SIZE_LABEL = '22 MB';
 
 /** ISO date the current APK was published. */
-export const APK_UPDATED = '2026-09-20';
+export const APK_UPDATED = '2026-09-21';
 
-/** Minimum Android version the app supports. */
-export const ANDROID_REQUIREMENT = 'Android 6.0 and newer';
+/**
+ * Minimum Android version the app supports.
+ *
+ * This is API 24, which is Flutter's default `minSdkVersion` and what the
+ * built APK actually declares — verified with `aapt2 dump badging`. Do not
+ * state a lower version here without changing `minSdk` in the app's
+ * build.gradle.kts and confirming the build still runs: an APK that will not
+ * install is a worse first impression than an honest requirement.
+ */
+export const ANDROID_REQUIREMENT = 'Android 7.0 and newer';
 
 /** Architectures the published APK supports. */
 export const APK_ARCHITECTURE = 'arm64-v8a';
